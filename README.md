@@ -1,2 +1,677 @@
-# tuibaoboihocduong
-túi thần kí giúp giải quyết vấn đề thiếu đồ của bạn
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trạm Tiếp Tế Học Đường - MUONDO</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <style>
+        /* ========================================
+           PHẦN 1: CSS - GIỮ NGUYÊN 100% CỦA BẠN
+           ========================================
+        */
+        :root {
+            --primary-color: #ffd700;
+            --dark-bg: #1f1f1f;
+            --card-bg: #ffffff;
+            --text-dark: #333333;
+            --transition-speed: 0.4s;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-bg);
+            color: white;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Thanh điều hướng */
+        header {
+            background-color: #000000;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 25px;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            text-transform: uppercase;
+            transition: var(--transition-speed);
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Hero Section */
+        .hero-banner {
+            height: 350px;
+            background-color: #111111;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-bottom: 2px solid #333;
+        }
+
+        .hero-banner h1 {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin: 0;
+            padding: 0;
+            font-weight: 900;
+        }
+
+        .hero-banner p {
+            font-size: 20px;
+            color: #aaaaaa;
+            margin: 15px 0 30px 0;
+        }
+
+        .search-container {
+            display: flex;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .search-container input {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 50px 0 0 50px;
+            outline: none;
+            font-size: 16px;
+        }
+
+        .search-container button {
+            padding: 15px 35px;
+            background-color: var(--primary-color);
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 0 50px 50px 0;
+            transition: 0.3s;
+        }
+
+        .search-container button:hover {
+            background-color: #ffffff;
+        }
+
+        /* Khu vực hiển thị sản phẩm */
+        .main-content {
+            padding: 60px 50px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-left: 6px solid var(--primary-color);
+            padding-left: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 32px;
+            margin: 0;
+        }
+
+        .item-counter {
+            background: var(--primary-color);
+            color: black;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 35px;
+        }
+
+        /* Card chi tiết */
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition-speed);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            animation: slideUp 0.6s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.2);
+        }
+
+        .product-image-container {
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            position: relative;
+        }
+
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .category-tag {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.7);
+            color: var(--primary-color);
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .product-info {
+            padding: 20px;
+            color: var(--text-dark);
+            flex-grow: 1;
+        }
+
+        .product-info h3 {
+            margin: 0 0 10px 0;
+            font-size: 22px;
+            color: #000;
+        }
+
+        .product-price {
+            font-size: 18px;
+            color: #e67e22;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .product-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            height: 40px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            font-style: italic;
+        }
+
+        .owner-info {
+            font-size: 13px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            color: #444;
+        }
+
+        .btn-group {
+            padding: 0 20px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-muon {
+            background-color: #000;
+            color: var(--primary-color);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-muon:hover {
+            background-color: var(--primary-color);
+            color: #000;
+        }
+
+        .btn-delete {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .admin-section {
+            background-color: #141414;
+            padding: 80px 50px;
+        }
+
+        .tab-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 12px 30px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: black;
+        }
+
+        .form-container {
+            display: none;
+            background-color: #252525;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 10px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: var(--primary-color);
+            color: black;
+            border: none;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #toast-notification {
+            visibility: hidden;
+            min-width: 300px;
+            background-color: var(--primary-color);
+            color: black;
+            text-align: center;
+            border-radius: 10px;
+            padding: 20px;
+            position: fixed;
+            z-index: 1001;
+            right: 30px;
+            top: 30px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        #toast-notification.show {
+            visibility: visible;
+            animation: slideInRight 0.5s, slideOutRight 0.5s 2.5s;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { right: -400px; opacity: 0; } to { right: 30px; opacity: 1; } }
+        @keyframes slideOutRight { from { right: 30px; opacity: 1; } to { right: -400px; opacity: 0; } }
+
+        footer { background-color: #000; padding: 50px; text-align: center; color: #666; border-top: 1px solid #222; }
+        footer b { color: var(--primary-color); }
+    </style>
+</head>
+<body>
+
+    <div id="toast-notification">Món đồ đã được cập nhật!</div>
+
+    <header>
+        <div class="logo-container">
+            <a href="#" class="logo-text"> MUONDO</a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#new-section">Sàn Giao Dịch</a></li>
+                <li><a href="#manage-section">Đăng Đồ</a></li>
+                <li><a href="#manage-section">Cam Kết</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="hero-banner">
+        <h1>SÀN MƯỢN ĐỒ HỌC ĐƯỜNG</h1>
+        <p>Kho đồ sộ phục vụ học tập và ngoại khóa cho học sinh</p>
+        <div class="search-container">
+            <input type="text" id="mainSearch" placeholder="Tìm tên món đồ, người đăng hoặc loại đồ...">
+            <button onclick="executeSearch()">TÌM KIẾM</button>
+        </div>
+    </div>
+
+    <div class="main-content" id="new-section">
+        <div class="section-header">
+            <h2>Kho Đồ Hiện Có</h2>
+            <div class="item-counter">
+                Tổng: <span id="totalItems">0</span> món | 
+                Lượt truy cập: <span id="visitCount">0</span>
+            </div>
+        </div>
+        <div class="product-grid" id="productDisplayGrid"></div>
+    </div>
+
+    <div class="admin-section" id="manage-section">
+        <div class="tab-wrapper">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchAdminTab('tab-post')">1. ĐĂNG ĐỒ MỚI</button>
+                <button class="tab-btn" onclick="switchAdminTab('tab-promise')">2. BẢN CAM KẾT</button>
+            </div>
+
+            <div id="tab-post" class="form-container active">
+                <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 30px;">THÔNG TIN ĐỒ CHO MƯỢN</h2>
+                <div class="form-group">
+                    <label>Phân loại món đồ</label>
+                    <select id="inputCategory">
+                        <option value="Công nghệ">Thiết bị Công nghệ</option>
+                        <option value="Sách vở">Sách & Tài liệu</option>
+                        <option value="Trang phục">Trang phục & Phụ kiện</option>
+                        <option value="Thể thao">Dụng cụ Thể thao</option>
+                        <option value="Khác">Loại khác...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tên món đồ cần đăng</label>
+                    <input type="text" id="inputName" placeholder="Ví dụ: Máy tính Casio 580VNX">
+                </div>
+                <div class="form-group">
+                    <label>Đường dẫn ảnh (Link URL)</label>
+                    <input type="text" id="inputImg" placeholder="Dán link ảnh">
+                </div>
+                <div class="form-group">
+                    <label>Giá thuê mong muốn (VNĐ/Ngày)</label>
+                    <input type="number" id="inputPrice" placeholder="Nhập 0 nếu cho mượn miễn phí">
+                </div>
+                <div class="form-group">
+                    <label>Thông tin người cho mượn</label>
+                    <input type="text" id="inputUser" placeholder="Tên của bạn và Lớp">
+                </div>
+                <div class="form-group">
+                    <label>Mô tả chi tiết bằng lời nói</label>
+                    <textarea id="inputDesc" rows="4" placeholder="Mô tả món đồ..."></textarea>
+                </div>
+                <button class="submit-btn" onclick="processNewPost()">XÁC NHẬN ĐĂNG LÊN SÀN</button>
+            </div>
+
+            <div id="tab-promise" class="form-container">
+                <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 30px;">BẢN CAM KẾT MƯỢN ĐỒ</h2>
+                <div class="form-group">
+                    <label>Họ và tên người mượn</label>
+                    <input type="text" id="promiseUser" placeholder="Nhập tên bạn">
+                </div>
+                <div class="form-group">
+                    <label>Món đồ đã chọn mượn</label>
+                    <input type="text" id="promiseItemName" readonly style="background-color: #333; color: #ffd700;">
+                </div>
+                <div class="form-group">
+                    <label>Ngày trả dự kiến</label>
+                    <input type="date" id="promiseDate">
+                </div>
+                <button class="submit-btn" onclick="processPromise()">GỬI YÊU CẦU MƯỢN</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Quản trị viên: <b>Lê Văn Phúc Anh, Phạm Bá Tuấn Anh, Phạm Ngọc Tuấn, Phan Đức Huy</b></p>
+        <p>Trường THPT chuyên Quốc Học Huế - Lớp: 12 lý 2 | Hotline: <b>0334160608</b></p>
+        <p>© 2026 - <b>MUONDO</b> Team Huế. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // --- PHẦN 1: CẤU HÌNH FIREBASE ĐỂ LÀM BỘ ĐẾM CHUNG ---
+        // (Sử dụng Database miễn phí của Google để đồng bộ con số trên mọi máy)
+        const firebaseConfig = {
+            databaseURL: "https://muondo-2026-default-rtdb.firebaseio.com/"
+        };
+        // Khởi tạo
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        function handleVisitorCount() {
+            const visitRef = db.ref('visitor_count');
+            
+            // Chỉ tăng số khi bắt đầu phiên truy cập mới (tránh F5 tăng ảo)
+            if (!sessionStorage.getItem('visited')) {
+                visitRef.transaction((current) => {
+                    return (current || 0) + 1;
+                });
+                sessionStorage.setItem('visited', 'true');
+            }
+
+            // Lắng nghe sự thay đổi từ "đám mây" để cập nhật ngay lập tức
+            visitRef.on('value', (snapshot) => {
+                const count = snapshot.val() || 0;
+                document.getElementById('visitCount').innerText = count;
+            });
+        }
+
+        // --- PHẦN 2: GIỮ NGUYÊN 100% LOGIC CŨ CỦA BẠN ---
+        let storageKey = "MUONDO_DATABASE_2026";
+
+        window.onload = function() {
+            renderProductsToUI();
+            updateTotalCounter();
+            handleVisitorCount(); // Gọi thêm bộ đếm mới
+        };
+
+        function switchAdminTab(tabId) {
+            let boxes = document.getElementsByClassName("form-container");
+            for (let i = 0; i < boxes.length; i++) { boxes[i].classList.remove("active"); }
+            let btns = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < btns.length; i++) { btns[i].classList.remove("active"); }
+            document.getElementById(tabId).classList.add("active");
+            event.currentTarget.classList.add("active");
+        }
+
+        function triggerToast(message) {
+            let toast = document.getElementById("toast-notification");
+            toast.innerText = message;
+            toast.classList.add("show");
+            setTimeout(function() { toast.classList.remove("show"); }, 3000);
+        }
+
+        function processNewPost() {
+            let category = document.getElementById("inputCategory").value;
+            let name = document.getElementById("inputName").value;
+            let img = document.getElementById("inputImg").value;
+            let price = document.getElementById("inputPrice").value;
+            let user = document.getElementById("inputUser").value;
+            let desc = document.getElementById("inputDesc").value;
+
+            if (name === "" || user === "") {
+                alert("Vui lòng nhập ít nhất là Tên món đồ và Tên của bạn!");
+                return;
+            }
+
+            let newItem = {
+                id: "ITEM_" + Date.now(),
+                category: category,
+                name: name,
+                img: img,
+                price: price,
+                user: user,
+                desc: desc,
+                datePosted: new Date().toLocaleDateString('vi-VN')
+            };
+
+            let currentList = JSON.parse(localStorage.getItem(storageKey)) || [];
+            currentList.unshift(newItem);
+            localStorage.setItem(storageKey, JSON.stringify(currentList));
+
+            renderProductsToUI();
+            updateTotalCounter();
+            triggerToast("🎉 Chúc mừng! Món đồ của bạn đã lên sàn.");
+            resetForm();
+            window.location.href = "#new-section";
+        }
+
+        function renderProductsToUI() {
+            let displayGrid = document.getElementById("productDisplayGrid");
+            let data = JSON.parse(localStorage.getItem(storageKey)) || [];
+            displayGrid.innerHTML = "";
+
+            if (data.length === 0) {
+                displayGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #666;"><p style="font-size: 20px;">Sàn hiện đang trống. Hãy là người đầu tiên đăng đồ!</p></div>`;
+                return;
+            }
+
+            data.forEach(function(item) {
+                let priceDisplay = item.price > 0 ? Number(item.price).toLocaleString() + " VNĐ/Ngày" : "Miễn phí";
+                let cardHTML = `
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <span class="category-tag">${item.category}</span>
+                            <img src="${item.img}" onerror="this.src='https://via.placeholder.com/400x300?text=Hinh+Anh+Chua+Cap+Nhat'">
+                        </div>
+                        <div class="product-info">
+                            <h3>${item.name}</h3>
+                            <span class="product-price">${priceDisplay}</span>
+                            <p class="product-description">"${item.desc}"</p>
+                            <div class="owner-info">
+                                <b>Người đăng:</b> ${item.user} <br>
+                                <small>Ngày đăng: ${item.datePosted}</small>
+                            </div>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn-muon" onclick="prepareToBorrow('${item.name}')">MƯỢN NGAY</button>
+                            <button class="btn-delete" onclick="removeItem('${item.id}')">Gỡ món đồ này</button>
+                        </div>
+                    </div>`;
+                displayGrid.innerHTML += cardHTML;
+            });
+        }
+
+        function removeItem(targetId) {
+            if (confirm("Bạn có chắc chắn muốn xóa món đồ này khỏi sàn không?")) {
+                let data = JSON.parse(localStorage.getItem(storageKey)) || [];
+                let filteredData = data.filter(item => item.id !== targetId);
+                localStorage.setItem(storageKey, JSON.stringify(filteredData));
+                renderProductsToUI();
+                updateTotalCounter();
+                triggerToast("Đã gỡ món đồ thành công.");
+            }
+        }
+
+        function prepareToBorrow(name) {
+            switchAdminTab('tab-promise');
+            document.getElementById("promiseItemName").value = name;
+            window.location.href = "#manage-section";
+        }
+
+        function processPromise() {
+            let borrower = document.getElementById("promiseUser").value;
+            let itemName = document.getElementById("promiseItemName").value;
+            if (borrower === "" || itemName === "") {
+                alert("Vui lòng điền tên bạn và chọn một món đồ mượn!");
+                return;
+            }
+            triggerToast("✅ Đã gửi yêu cầu mượn! Vui lòng liên hệ người đăng.");
+            document.getElementById("promiseUser").value = "";
+        }
+
+        function executeSearch() {
+            let keyword = document.getElementById("mainSearch").value.toLowerCase();
+            let cards = document.getElementsByClassName("product-card");
+            for (let i = 0; i < cards.length; i++) {
+                let content = cards[i].innerText.toLowerCase();
+                cards[i].style.display = content.includes(keyword) ? "flex" : "none";
+            }
+        }
+
+        function updateTotalCounter() {
+            let data = JSON.parse(localStorage.getItem(storageKey)) || [];
+            document.getElementById("totalItems").innerText = data.length;
+        }
+
+        function resetForm() {
+            document.querySelectorAll('#tab-post input, #tab-post textarea').forEach(el => el.value = "");
+        }
+    </script>
+</body>
+</html>
